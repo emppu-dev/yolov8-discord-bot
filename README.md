@@ -35,5 +35,8 @@ python main.py
 ## 🎮 Usage
 To use the bot, post an image in the Discord channel. Then run the /analyze command and the bot will download the image, analyze it, and post the analyzed image back to the channel.
 
+## 📷 Preview
+![](https://github.com/emppu-dev/yolov8-discord-bot/blob/main/preview.png?raw=true)
+
 ## 🤝 Contributing
 Pull requests are always welcome.
