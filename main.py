@@ -24,10 +24,10 @@ def download_image(url):
 
 def handle_objects(objects):
     counts = {}
-    for vehicle in objects:
-        counts[vehicle] = counts.get(vehicle, 0) + 1
+    for object in objects:
+        counts[object] = counts.get(object, 0) + 1
 
-    result_string = ', '.join([f'{count} {vehicle}s' if count > 1 else f'{count} {vehicle}' for vehicle, count in counts.items()])
+    result_string = ', '.join([f'{count} {object}s' if count > 1 else f'{count} {object}' for object, count in counts.items()])
     return result_string
 
 model = YOLO("yolov8n.pt")
