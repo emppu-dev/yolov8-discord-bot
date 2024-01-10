@@ -10,19 +10,19 @@ intents = discord.Intents.all()
 client = commands.Bot(command_prefix="/",intents=intents)
 client.remove_command("help")
 
-with open('config.json', 'r') as f:
+with open("config.json", "r") as f:
     config = json.load(f)
-    token = str(config['token'])
-    guildId = int(config['guildId'])
+    token = str(config["token"])
+    guildId = int(config["guildId"])
 
 def download_image(url):
     response = requests.get(url, stream=True)
     if response.status_code == 200:
-        with open('./temp/input.jpg', 'wb') as file:
+        with open("./temp/input.jpg", "wb") as file:
             for chunk in response.iter_content(1024):
                 file.write(chunk)
 
-model = YOLO('yolov8n.pt')
+model = YOLO("yolov8n.pt")
 box_color = (0, 0, 255)
 
 def box_label(img, box, cls, names, color=None):
@@ -47,16 +47,16 @@ async def analyze(interaction: discord.Interaction):
        if len(message.attachments) > 0:
            url = message.attachments[0].url
            download_image(url)
-           img = cv2.imread('./temp/input.jpg')
+           img = cv2.imread("./temp/input.jpg")
            results = model.predict(img)
 
            for r in results:
                boxes = r.boxes
                for box in boxes:
                   img = box_label(img, box, box.cls, model.names, box_color)
-           cv2.imwrite('./temp/output.jpg', img)
+           cv2.imwrite("./temp/output.jpg", img)
 
-           with open('./temp/output.jpg', 'rb') as f:
+           with open("./temp/output.jpg", "rb") as f:
                picture = discord.File(f)
                await interaction.followup.send(file=picture)
            break 
