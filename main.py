@@ -22,6 +22,14 @@ def download_image(url):
             for chunk in response.iter_content(1024):
                 file.write(chunk)
 
+def handle_objects(objects):
+    counts = {}
+    for vehicle in objects:
+        counts[vehicle] = counts.get(vehicle, 0) + 1
+
+    result_string = ', '.join([f'{count} {vehicle}s' if count > 1 else f'{count} {vehicle}' for vehicle, count in counts.items()])
+    return result_string
+
 model = YOLO("yolov8n.pt")
 box_color = (0, 0, 255)
 
@@ -42,23 +50,34 @@ async def on_ready():
 
 @client.tree.command(name="analyze", guild = discord.Object(id=guildId))
 async def analyze(interaction: discord.Interaction):
-   await interaction.response.defer()
-   async for message in interaction.channel.history(limit=100, oldest_first=False):
-       if len(message.attachments) > 0:
-           url = message.attachments[0].url
-           download_image(url)
-           img = cv2.imread("./temp/input.jpg")
-           results = model.predict(img)
+    await interaction.response.defer()
+    async for message in interaction.channel.history(limit=100, oldest_first=False):
+        if len(message.attachments) > 0:
+            url = message.attachments[0].url
+            download_image(url)
+            img = cv2.imread("./temp/input.jpg")
+            results = model.predict(img)
 
-           for r in results:
-               boxes = r.boxes
-               for box in boxes:
-                  img = box_label(img, box, box.cls, model.names, box_color)
-           cv2.imwrite("./temp/output.jpg", img)
+            objects = []
 
-           with open("./temp/output.jpg", "rb") as f:
-               picture = discord.File(f)
-               await interaction.followup.send(file=picture)
-           break 
+            for r in results:
+                boxes = r.boxes
+                for box in boxes:
+                    img = box_label(img, box, box.cls, model.names, box_color)
+                    objects.append(model.names[int(box.cls)])
+
+            object_string = handle_objects(objects)
+
+            if object_string:
+
+                cv2.imwrite("./temp/output.jpg", img)
+
+                with open("./temp/output.jpg", "rb") as f:
+                    picture = discord.File(f)
+                    await interaction.followup.send(object_string,file=picture)
+                break
+            else:
+                await interaction.followup.send("No objects found in the image.")
+                break
 
 client.run(token)
